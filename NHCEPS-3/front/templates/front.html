@@ -1,0 +1,258 @@
+<!-- templates/front.html -->
+<!DOCTYPE html>
+<html lang="en">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BILL UPLOAD</title>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <img src="{{ url_for('static', filename='LOGO.png') }}" alt="BillReader Logo" class="nav-logo">
+                <span class="logo">BillReader</span>
+            </div>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="toggleAbout()">About Us</button>
+                <button class="nav-btn theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="about-modal" id="aboutModal">
+        <div class="about-content">
+            <span class="close-btn" onclick="toggleAbout()">&times;</span>
+            <h2>About BillReader</h2>
+            <p>BillReader is an intelligent bill processing application that uses OCR and AI to extract and categorize information from your bills. Our mission is to make bill management simple and efficient.</p>
+            <p>Features:</p>
+            <ul>
+                <li>OCR Text Extraction</li>
+                <li>AI-Powered Categorization</li>
+                <li>Multiple Export Formats</li>
+                <li>User-Friendly Interface</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>Upload Your Bill</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Upload</button>
+        </form>
+
+        {% if ocr_text %}
+        <div class="result-container">
+            <div class="bill-image">
+                <h2>Uploaded Image:</h2>
+                <img src="{{ image_url }}" alt="Uploaded Bill">
+            </div>
+            <div class="extracted-text">
+                <h2>Extracted Text:</h2>
+                <pre>{{ ocr_text }}</pre>
+                <div class="export-buttons">
+                    <button onclick="exportToTxt()" class="export-btn">Export as TXT</button>
+                    <button onclick="exportToExcel()" class="export-btn">Export as Excel</button>
+                    <button onclick="exportToAISortedExcel()" class="export-btn ai-btn">AI Sorted Excel</button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <script>
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+        let mouseX = 0;
+        let mouseY = 0;
+        let cursorX = 0;
+        let cursorY = 0;
+        let dotX = 0;
+        let dotY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Smooth cursor animation
+        function animateCursor() {
+            // Smooth follow for main cursor
+            const diffX = mouseX - cursorX;
+            const diffY = mouseY - cursorY;
+            cursorX += diffX * 0.1;
+            cursorY += diffY * 0.1;
+            cursor.style.left = `${cursorX - cursor.offsetWidth / 2}px`;
+            cursor.style.top = `${cursorY - cursor.offsetHeight / 2}px`;
+
+            // Faster follow for cursor dot
+            const dotDiffX = mouseX - dotX;
+            const dotDiffY = mouseY - dotY;
+            dotX += dotDiffX * 0.3;
+            dotY += dotDiffY * 0.3;
+            cursorDot.style.left = `${dotX - cursorDot.offsetWidth / 2}px`;
+            cursorDot.style.top = `${dotY - cursorDot.offsetHeight / 2}px`;
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Cursor hover effect for interactive elements
+        const interactiveElements = document.querySelectorAll('a, button, input[type="file"], .nav-btn, .close-btn');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursorDot.style.transform = 'scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursorDot.style.transform = 'scale(1)';
+            });
+        });
+
+        // Hide cursor when leaving window
+        document.addEventListener('mouseleave', () => {
+            cursor.style.display = 'none';
+            cursorDot.style.display = 'none';
+        });
+
+        document.addEventListener('mouseenter', () => {
+            cursor.style.display = 'block';
+            cursorDot.style.display = 'block';
+        });
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const themeIcon = document.querySelector('.theme-toggle i');
+            if (document.body.classList.contains('light-theme')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        // About modal functionality
+        function toggleAbout() {
+            const modal = document.getElementById('aboutModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('aboutModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function exportToTxt() {
+            const text = document.querySelector('pre').textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_text.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToExcel() {
+            const text = document.querySelector('pre').textContent;
+            // Convert text to CSV format
+            const csvContent = text.split('\n').map(line => {
+                // Split by multiple spaces and tabs
+                const cells = line.split(/\s+/).filter(cell => cell.trim() !== '');
+                return cells.join(',');
+            }).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_text.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function exportToAISortedExcel() {
+            const text = document.querySelector('pre').textContent;
+            
+            // Show loading state
+            const aiBtn = document.querySelector('.ai-btn');
+            const originalText = aiBtn.textContent;
+            aiBtn.textContent = 'Processing...';
+            aiBtn.disabled = true;
+
+            try {
+                // This is where the AI API call will be made
+                // For now, we'll use a placeholder structure
+                const response = await fetch('/ai-process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error('AI processing failed');
+                }
+
+                const data = await response.json();
+                
+                // Create Excel with AI-sorted data
+                const csvContent = data.sortedData.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ai_sorted_data.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('AI processing failed. Please try again later.');
+            } finally {
+                // Reset button state
+                aiBtn.textContent = originalText;
+                aiBtn.disabled = false;
+            }
+        }
+
+        // Reactive Gradient Background
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth * 100;
+            const y = e.clientY / window.innerHeight * 100;
+            
+            document.querySelector('.gradient-bg').style.background = `
+                radial-gradient(circle at ${x}% ${y}%, 
+                rgba(33, 150, 243, 0.15) 0%,
+                rgba(25, 118, 210, 0.1) 25%,
+                rgba(13, 71, 161, 0.05) 50%,
+                transparent 70%),
+                linear-gradient(45deg, #1e1e1e, #2d2d2d)
+            `;
+        });
+    </script>
+</body>
+</html>
