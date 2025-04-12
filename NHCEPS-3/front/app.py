@@ -9,7 +9,7 @@ UPLOAD_FOLDER = os.path.join('static', 'uploads')
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # OpenAI configuration
-openai.api_key = ""
+# openai.api_key = ""
 
 # App setup
 app = Flask(__name__)
