@@ -1,0 +1,420 @@
+<!-- templates/front.html -->
+<!DOCTYPE html>
+<html lang="en">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<head>
+    <meta charset="UTF-8">
+    <title>BILL UPLOAD</title>
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div class="cursor"></div>
+    <div class="cursor-dot"></div>
+    
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <img src="{{ url_for('static', filename='LOGO.png') }}" alt="BillReader Logo" class="nav-logo">
+                <span class="logo">BillReader</span>
+            </div>
+            <div class="nav-right">
+                <button class="nav-btn" onclick="toggleAbout()">About Us</button>
+                <button class="nav-btn theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="about-modal" id="aboutModal">
+        <div class="about-content">
+            <span class="close-btn" onclick="toggleAbout()">&times;</span>
+            <h2>About BillReader</h2>
+            <p>BillReader is an intelligent bill processing application that uses OCR and AI to extract and categorize information from your bills. Our mission is to make bill management simple and efficient.</p>
+            <p>Features:</p>
+            <ul>
+                <li>OCR Text Extraction</li>
+                <li>AI-Powered Categorization</li>
+                <li>Multiple Export Formats</li>
+                <li>User-Friendly Interface</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="upload-section">
+                <h1>Bill Processing System</h1>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-section">
+                        <h2>Upload Bill Image</h2>
+                        <input type="file" id="imageInput" accept="image/*" required>
+                        <button type="button" id="uploadImageBtn" class="upload-btn">Upload Image</button>
+                    </div>
+                    
+                    <div class="upload-section" id="excelSection" style="display: none;">
+                        <h2>Upload Excel Template</h2>
+                        <input type="file" id="excelInput" accept=".xlsx,.xls" required>
+                        <p class="help-text">Upload an Excel file to populate with extracted data</p>
+                    </div>
+
+                    <div class="api-section" id="apiSection" style="display: none;">
+                        <h2>Select API Integration (Optional)</h2>
+                        <select id="apiSelect" class="api-select">
+                            <option value="none">No API Integration</option>
+                            <option value="openai">OpenAI GPT</option>
+                            <option value="google">Google Vision</option>
+                            <option value="azure">Azure Computer Vision</option>
+                            <option value="custom">Custom API</option>
+                        </select>
+                        <div id="apiKeyInput" class="api-key-input" style="display: none;">
+                            <input type="text" id="apiKey" placeholder="Enter your API key">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="processButton" style="display: none;">Process Bill</button>
+                </form>
+            </div>
+
+            <div class="extracted-text-section">
+                <h2>Extracted Text</h2>
+                <div id="extractedText" class="extracted-text">
+                    <p>Text will appear here after processing...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Interactive Gradient Background
+        const gradientBg = document.querySelector('.gradient-bg');
+        
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            gradientBg.style.background = `radial-gradient(circle at ${x * 100}% ${y * 100}%, 
+                rgba(33, 150, 243, 0.2) 0%,
+                rgba(25, 118, 210, 0.1) 25%,
+                rgba(13, 71, 161, 0.05) 50%,
+                transparent 70%)`;
+        });
+
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorDot = document.querySelector('.cursor-dot');
+        let mouseX = 0;
+        let mouseY = 0;
+        let cursorX = 0;
+        let cursorY = 0;
+        let dotX = 0;
+        let dotY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        // Smooth cursor animation
+        function animateCursor() {
+            const diffX = mouseX - cursorX;
+            const diffY = mouseY - cursorY;
+            cursorX += diffX * 0.1;
+            cursorY += diffY * 0.1;
+            cursor.style.left = `${cursorX - cursor.offsetWidth / 2}px`;
+            cursor.style.top = `${cursorY - cursor.offsetHeight / 2}px`;
+
+            const dotDiffX = mouseX - dotX;
+            const dotDiffY = mouseY - dotY;
+            dotX += dotDiffX * 0.3;
+            dotY += dotDiffY * 0.3;
+            cursorDot.style.left = `${dotX - cursorDot.offsetWidth / 2}px`;
+            cursorDot.style.top = `${dotY - cursorDot.offsetHeight / 2}px`;
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Cursor hover effect for interactive elements
+        const interactiveElements = document.querySelectorAll('a, button, input[type="file"], .nav-btn, .close-btn');
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'scale(1.5)';
+                cursorDot.style.transform = 'scale(1.5)';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'scale(1)';
+                cursorDot.style.transform = 'scale(1)';
+            });
+        });
+
+        // Hide cursor when leaving window
+        document.addEventListener('mouseleave', () => {
+            cursor.style.display = 'none';
+            cursorDot.style.display = 'none';
+        });
+
+        document.addEventListener('mouseenter', () => {
+            cursor.style.display = 'block';
+            cursorDot.style.display = 'block';
+        });
+
+        // Theme toggle functionality
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const themeIcon = document.querySelector('.theme-toggle i');
+            if (document.body.classList.contains('light-theme')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        }
+
+        // About modal functionality
+        function toggleAbout() {
+            const modal = document.getElementById('aboutModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('aboutModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        function exportToTxt() {
+            const text = document.querySelector('pre').textContent;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_text.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportToExcel() {
+            const text = document.querySelector('pre').textContent;
+            // Convert text to CSV format
+            const csvContent = text.split('\n').map(line => {
+                // Split by multiple spaces and tabs
+                const cells = line.split(/\s+/).filter(cell => cell.trim() !== '');
+                return cells.join(',');
+            }).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'extracted_text.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        async function exportToAISortedExcel() {
+            const text = document.querySelector('pre').textContent;
+            
+            // Show loading state
+            const aiBtn = document.querySelector('.ai-btn');
+            const originalText = aiBtn.textContent;
+            aiBtn.textContent = 'Processing...';
+            aiBtn.disabled = true;
+
+            try {
+                const response = await fetch('/ai-process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text })
+                });
+
+                if (!response.ok) {
+                    throw new Error('AI processing failed');
+                }
+
+                const data = await response.json();
+                
+                // Create Excel with AI-sorted data
+                const csvContent = data.sortedData.map(row => row.join(',')).join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ai_sorted_data.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('AI processing failed. Please try again later.');
+            } finally {
+                // Reset button state
+                aiBtn.textContent = originalText;
+                aiBtn.disabled = false;
+            }
+        }
+
+        // API Selection Handler
+        document.getElementById('apiSelect').addEventListener('change', function(e) {
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            if (e.target.value === 'none') {
+                apiKeyInput.style.display = 'none';
+            } else {
+                apiKeyInput.style.display = 'block';
+            }
+        });
+
+        // Image upload handler
+        document.getElementById('uploadImageBtn').addEventListener('click', async function() {
+            const imageFile = document.getElementById('imageInput').files[0];
+            const extractedTextDiv = document.getElementById('extractedText');
+            
+            if (!imageFile) {
+                alert('Please select an image file first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', imageFile);
+
+            try {
+                // Show loading state
+                extractedTextDiv.innerHTML = '<p>Processing image and extracting text...</p>';
+                this.disabled = true;
+                this.textContent = 'Processing...';
+                
+                const response = await fetch('/process-image', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Image processing failed');
+                }
+
+                const text = await response.text();
+                
+                // Display extracted text
+                extractedTextDiv.innerHTML = `<pre>${text || 'No text could be extracted'}</pre>`;
+                
+                // Show Excel section and process button
+                document.getElementById('excelSection').style.display = 'block';
+                document.getElementById('apiSection').style.display = 'block';
+                document.getElementById('processButton').style.display = 'block';
+                
+                // Reset button
+                this.disabled = false;
+                this.textContent = 'Upload Image';
+
+            } catch (error) {
+                console.error('Error:', error);
+                extractedTextDiv.innerHTML = '<p>Error processing image. Please try again.</p>';
+                this.disabled = false;
+                this.textContent = 'Upload Image';
+                alert('Error processing image. Please try again.');
+            }
+        });
+
+        // Form submission handler (for Excel processing)
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const excelFile = document.getElementById('excelInput').files[0];
+            const selectedApi = document.getElementById('apiSelect').value;
+            const apiKey = document.getElementById('apiKey').value;
+            const processButton = document.getElementById('processButton');
+            
+            if (!excelFile) {
+                alert('Please upload an Excel file');
+                return;
+            }
+
+            if (selectedApi !== 'none' && !apiKey) {
+                alert('Please enter your API key');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('excel', excelFile);
+            formData.append('api_type', selectedApi);
+            if (apiKey) {
+                formData.append('api_key', apiKey);
+            }
+
+            try {
+                // Show loading state
+                processButton.disabled = true;
+                processButton.textContent = 'Processing...';
+                
+                const response = await fetch('/process-excel', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Excel processing failed');
+                }
+
+                // Download Excel file
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'processed_bill.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert(error.message || 'Error processing Excel file. Please try again.');
+            } finally {
+                // Reset button state
+                processButton.disabled = false;
+                processButton.textContent = 'Process Bill';
+            }
+        });
+    </script>
+</body>
+</html>
+
+<style>
+.upload-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #2196F3, #1976D2);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+}
+
+.upload-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+</style>

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "billextracter",
+  "private_key_id": "2d55c5313f14971f478677f831d1f822e5c2514f",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDaTHf561RUaC6F\nU53arkQBlkkcqFzuOkYHryfzY2lyrJqN7c5wPhRKMNp3ffpgoTAOYgpgGwxYmlUa\n/uXHmW08dvVUxaxNWOBAZVouIyF2ODC7WfnpHbbWMcYNiAduP3DI4FIQW27+ayX6\nSgqF8WCfPlI7dcRU1X8RJOtikQykV8BWVgfchNqSQK28W/FNNC04AQPMu1ztWgBz\nhpwpJ6Gy7COxzCHJWKumm7NFfQ+eO8s0oT+rQDbI5ZMLMJLwEeIHlaoi5+ZyjibJ\nOfL1GW645vhgWV5SaQG5q09iYteVwQimvSk5VPpdTgS/A3BiJqM8ZFiQe/LllIKh\ngMVVpuJtAgMBAAECggEAFyu1M2ORbqklQPUcZP0IzmNRjNdpD8dDLicfFjQ32dps\nyEJU3nCUbkCLu9G1HQMW6vvojoVodNIi1Ov3300PfXLB/RbDQG191g/797g2Yco6\nj/RPtLj48njThRWqdj8JHWVECKTv3dTpMc0gm1GA2D5A87s/FOMZauwwiOSNAzdz\n/N1fs1Tn85IOBzzJ+uhLjbyOUoaHO/0hHPkkLtaHpcF4kPMB+FgrM4pieGOIqvIE\n3YurTswwFRY4XJxvbK+X4jj6QwII3H4yE6ECO0s0gHJ2g1/aQuZZ+tTImOmKN0ah\n126t8DkIXh08A9oww2pLrHPJ1mBI/pW4nkydCf8n6QKBgQD4sZIUGj3KY130fnwF\nhFZhGMGaN6URAlZmrWkyHanZwhQ3byVlxYS4UMHUQ4PFwgLV5EDtSFnPvIbWAzDg\nc8ClcZklKPSoyXv8E56+rc7PAsS8fyZvnmxX9iaWZITlwIHYrcF0rzIuSwe+FLkY\nTFK/oFFqY4/vHJUNqJa1fjZapQKBgQDgtkwWZl8MHhEw5AySUoMVT0wR6L4EzHI/\n6QL+h75ZhEsSasyIUHrvdE0T30K7n5qI99lgWDDiRJBd9gBNmWYlgkslcxbvEegu\n2yP9t+pZgdJgUa//Q31x64fC6WHFmrz2ECrX6yefv3L5z7gXRieuxabaL61yqdjD\nDhXCpYCGKQKBgE4MrKPSeIIEHYCWEaZJmjJu6pPT0uI7sZIX6mPoG15UIrQjFcGS\n88xEzBAqADkYYntuX1IY2tbvfAG+jqBis5s4w6994wr18QtzvOZq9fTSEZx260Es\nnyQcBJA+i9bvS9EM9yH/uef9dDibmFuf2Hh7gBG7nXiVp9HZjzL2oWhhAoGABsZ4\nVNSRWRQvAIJfvqmuOh5B9OhHkm13pGWqKXJ+UsSiXtPJhvKmQkIHcOnyYSXWyvpu\nG3GNR8U5dRvNtolBgzAChAaMUnj/vynsU+IPttMrPKw52kB2r9CiL0ZKJGMd/21N\nXWVBtJdZKB8TNeBvod1jwoBdgm+MkZUDIvNKhMECgYEA0AhVZEKI8N4U4ki5RPmi\nF9QeB0YDelOY28A4W8LLgXxNg37qsDZcOQSLBS5iWzwm/nPtRzPi7lJj2ra3n9p2\nfbIcunAvpw/pzwxwCTyeh/++lvMr48qBjij9tWubv0ehfMagQHSyrzR3jDJ8APTX\nqzkn0PCkKdMYG7oafH8JQ/k=\n-----END PRIVATE KEY-----\n",
+  "client_email": "billextractornhce@billextracter.iam.gserviceaccount.com",
+  "client_id": "114646032685125397563",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/billextractornhce%40billextracter.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
